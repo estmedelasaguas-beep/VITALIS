@@ -4,46 +4,455 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vitalis | Panel de Gestión Clínica</title>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f4c81;
+            --primary-dark: #0a355c;
+            --accent: #0d9488;
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        /* Navbar Superior */
+        .topbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.15);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo {
+            background: var(--accent);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.4rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .brand-info h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.14);
+            padding: 3px 10px;
+            border-radius: 99px;
+            margin-top: 4px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: #4ade80;
+            border-radius: 50%;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .btn-nav:hover {
+            background: rgba(255,255,255,0.22);
+        }
+
+        .btn-logout {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .btn-logout:hover {
+            background: #b91c1c;
+        }
+
+        /* Contenedor Principal */
+        .container {
+            max-width: 1180px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Tarjetas KPI en 4 columnas */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        @media (max-width: 900px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 500px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            padding: 1.3rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        .kpi-card.pending { border-left-color: #f59e0b; }
+        .kpi-card.confirmed { border-left-color: #10b981; }
+        .kpi-card.blocked { border-left-color: #0284c7; }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-value {
+            font-size: 1.85rem;
+            font-weight: 700;
+            margin: 4px 0 0;
+            color: var(--text);
+        }
+
+        .kpi-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: #f1f5f9;
+        }
+
+        /* Tarjetas de Contenido */
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            padding: 1.6rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1.1rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: var(--primary);
+        }
+
+        .card-header p {
+            margin: 2px 0 0;
+            font-size: 0.83rem;
+            color: var(--muted);
+        }
+
+        /* Barra de filtros */
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-control {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            background: #fff;
+            color: var(--text);
+        }
+
+        .input-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+        }
+
+        /* Tabla Moderna */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8fafc;
+            color: var(--muted);
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.88rem;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .ref-code {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--primary);
+            background: #eff6ff;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* Badges de Estado */
+        .badge {
+            display: inline-block;
+            padding: 4px 11px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .Pendiente { background: #fef3c7; color: #92400e; }
+        .Confirmada { background: #dcfce7; color: #166534; }
+        .Rechazada { background: #fee2e2; color: #991b1b; }
+        .Cancelada { background: #e2e8f0; color: #475569; }
+
+        /* Botones de acción */
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-right: 4px;
+        }
+
+        .btn-action:hover { opacity: 0.9; }
+        .btn-ok { background: #16a34a; }
+        .btn-no { background: #dc2626; }
+
+        /* Formulario Bloqueos Horizontal */
+        .block-form {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .block-form { grid-template-columns: 1fr; }
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.88rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            height: 39px;
+        }
+
+        .btn-primary:hover { background: var(--primary-dark); }
+
+        .chips-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 1.2rem;
+        }
+
+        .chip {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chip button {
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
+
+    <!-- Barra Superior -->
+    <header class="topbar">
         <div class="brand">
-            <div class="brand-icon">+</div>
-            <div class="brand-text">
+            <div class="brand-logo">+</div>
+            <div class="brand-info">
                 <h1>VITALIS · Gestión Interna</h1>
-                <span id="infoUsuario">Cargando sesión...</span>
+                <div class="user-badge">
+                    <span class="status-dot"></span>
+                    <span id="infoUsuario">Cargando sesión...</span>
+                </div>
             </div>
         </div>
-        <div style="display:flex; gap:10px;">
-            <a href="index.html" class="btn-nav">Ver Portal Público</a>
-            <button onclick="cerrarSesion()" class="btn-nav" style="background:rgba(220,38,38,0.25);">Cerrar Sesión</button>
+        <div class="nav-actions">
+            <a href="index.html" class="btn-nav">🌐 Ver Portal Público</a>
+            <button onclick="cerrarSesion()" class="btn-nav btn-logout">Cerrar Sesión</button>
         </div>
-    </nav>
+    </header>
 
     <main class="container">
-        <!-- Indicadores -->
-        <div class="kpi-grid">
-            <div class="kpi-card"><span>TOTAL SOLICITUDES</span><h4 id="kpiTotal">0</h4></div>
-            <div class="kpi-card"><span>PENDIENTES</span><h4 id="kpiPendientes" style="color:#d97706;">0</h4></div>
-            <div class="kpi-card"><span>CONFIRMADAS</span><h4 id="kpiConfirmadas" style="color:#16a34a;">0</h4></div>
-            <div class="kpi-card"><span>BLOQUEOS AGENDA</span><h4 id="kpiBloqueos" style="color:#0284c7;">0</h4></div>
-        </div>
+        <!-- 4 Tarjetas de Resumen (KPIs) -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div>
+                    <div class="kpi-label">Total Solicitudes</div>
+                    <div class="kpi-value" id="kpiTotal">0</div>
+                </div>
+                <div class="kpi-icon">📋</div>
+            </div>
+            <div class="kpi-card pending">
+                <div>
+                    <div class="kpi-label">Pendientes</div>
+                    <div class="kpi-value" id="kpiPendientes" style="color:#d97706;">0</div>
+                </div>
+                <div class="kpi-icon" style="background:#fef3c7;">⏳</div>
+            </div>
+            <div class="kpi-card confirmed">
+                <div>
+                    <div class="kpi-label">Confirmadas</div>
+                    <div class="kpi-value" id="kpiConfirmadas" style="color:#16a34a;">0</div>
+                </div>
+                <div class="kpi-icon" style="background:#dcfce7;">✅</div>
+            </div>
+            <div class="kpi-card blocked">
+                <div>
+                    <div class="kpi-label">Bloqueos Agenda</div>
+                    <div class="kpi-value" id="kpiBloqueos" style="color:#0284c7;">0</div>
+                </div>
+                <div class="kpi-icon" style="background:#e0f2fe;">🔒</div>
+            </div>
+        </section>
 
-        <!-- Gestión de Citas (CU-06 / CU-07) -->
-        <div class="card">
+        <!-- Tabla de Citas -->
+        <section class="card">
             <div class="card-header">
-                <h3>Solicitudes de Citas Programadas</h3>
-                <select id="filtroEstado" onchange="cargarCitas()" style="width: auto; margin: 0; padding: 6px 12px;">
-                    <option value="TODOS">Todos los estados</option>
-                    <option value="Pendiente">Pendientes</option>
-                    <option value="Confirmada">Confirmadas</option>
-                    <option value="Rechazada">Rechazadas</option>
-                    <option value="Cancelada">Canceladas</option>
-                </select>
+                <div>
+                    <h2>Solicitudes de Citas Programadas</h2>
+                    <p>Gestione la aprobación o rechazo de turnos solicitados por los pacientes.</p>
+                </div>
+                <div class="filters">
+                    <input type="text" id="buscador" class="input-control" placeholder="Buscar por nombre, cédula o VIT..." oninput="cargarCitas()">
+                    <select id="filtroEstado" class="input-control" onchange="cargarCitas()">
+                        <option value="TODOS">Todos los estados</option>
+                        <option value="Pendiente">Pendientes</option>
+                        <option value="Confirmada">Confirmadas</option>
+                        <option value="Rechazada">Rechazadas</option>
+                        <option value="Cancelada">Canceladas</option>
+                    </select>
+                </div>
             </div>
 
-            <div style="overflow-x: auto;">
+            <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
@@ -59,18 +468,21 @@
                     <tbody id="tablaCitas"></tbody>
                 </table>
             </div>
-        </div>
+        </section>
 
-        <!-- Gestión de Excepciones / Bloqueos (CU-05) -->
-        <div class="card">
+        <!-- Control de Agenda / Excepciones -->
+        <section class="card">
             <div class="card-header">
-                <h3>Bloqueo de Disponibilidad y Excepciones</h3>
-                <span class="tag">Control de Agenda</span>
-            </div>
-            <form id="formBloqueo" class="form-row" style="grid-template-columns: 1fr 1fr 1fr auto; align-items: end;">
                 <div>
-                    <label>Servicio</label>
-                    <select id="bloqServicio" style="margin:0;">
+                    <h2>Bloqueo de Disponibilidad y Excepciones</h2>
+                    <p>Deshabilite bloques horarios por ausencia médica, mantenimiento o cierre de agenda.</p>
+                </div>
+            </div>
+
+            <form id="formBloqueo" class="block-form">
+                <div class="form-group">
+                    <label>Especialidad / Servicio</label>
+                    <select id="bloqServicio">
                         <option value="TODOS">Todos los servicios</option>
                         <option value="Medicina General">Medicina General</option>
                         <option value="Pediatría">Pediatría</option>
@@ -79,25 +491,27 @@
                         <option value="Ortopedia">Ortopedia</option>
                     </select>
                 </div>
-                <div>
-                    <label>Fecha</label>
-                    <input type="date" id="bloqFecha" style="margin:0;" required>
+                <div class="form-group">
+                    <label>Fecha de excepción</label>
+                    <input type="date" id="bloqFecha" required>
                 </div>
-                <div>
-                    <label>Hora a bloquear</label>
-                    <select id="bloqHora" style="margin:0;">
-                        <option value="08:00">08:00</option>
-                        <option value="09:00">09:00</option>
-                        <option value="10:00">10:00</option>
-                        <option value="11:00">11:00</option>
-                        <option value="14:00">14:00</option>
-                        <option value="15:00">15:00</option>
-                        <option value="16:00">16:00</option>
+                <div class="form-group">
+                    <label>Bloque horario</label>
+                    <select id="bloqHora">
+                        <option value="08:00">08:00 AM</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="14:00">02:00 PM</option>
+                        <option value="15:00">03:00 PM</option>
+                        <option value="16:00">04:00 PM</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary" style="width:auto; padding: 10px 18px;">Bloquear Turno</button>
+                <button type="submit" class="btn-primary">+ Bloquear Turno</button>
             </form>
-        </div>
+
+            <div id="listaBloqueos" class="chips-list"></div>
+        </section>
     </main>
 
     <script>
@@ -119,6 +533,7 @@
             const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
             const bloqueos = JSON.parse(localStorage.getItem('vitalis_bloqueos')) || [];
             const filtro = document.getElementById('filtroEstado').value;
+            const textoBusqueda = document.getElementById('buscador').value.trim().toLowerCase();
             const tbody = document.getElementById('tablaCitas');
 
             // Actualizar KPIs
@@ -128,25 +543,27 @@
             document.getElementById('kpiBloqueos').textContent = bloqueos.length;
 
             tbody.innerHTML = '';
-            const filtradas = filtro === 'TODOS' ? citas : citas.filter(c => c.estado === filtro);
-
-            if (filtradas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:2rem;">No hay solicitudes para mostrar en esta vista.</td></tr>';
-                return;
-            }
+            let visibles = 0;
 
             citas.forEach((c, index) => {
-                if (filtro !== 'TODOS' && c.estado !== filtro) return;
+                const coincideEstado = (filtro === 'TODOS' || c.estado === filtro);
+                const coincideTexto = !textoBusqueda ||
+                    c.nombre.toLowerCase().includes(textoBusqueda) ||
+                    c.cedula.includes(textoBusqueda) ||
+                    c.referencia.toLowerCase().includes(textoBusqueda);
+
+                if (!coincideEstado || !coincideTexto) return;
+                visibles++;
 
                 const botones = c.estado === 'Pendiente'
-                    ? `<button class="btn-action btn-ok" onclick="decidir(${index}, 'Confirmada')">Confirmar</button>
-                       <button class="btn-action btn-no" onclick="decidir(${index}, 'Rechazada')">Rechazar</button>`
-                    : `<span style="color:var(--muted); font-size:0.8rem;">Cerrada</span>`;
+                    ? `<button class="btn-action btn-ok" onclick="decidir(${index}, 'Confirmada')">✓ Confirmar</button>
+                       <button class="btn-action btn-no" onclick="decidir(${index}, 'Rechazada')">✕ Rechazar</button>`
+                    : `<span style="color:var(--muted); font-size:0.8rem;">Procesada</span>`;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${c.referencia}</strong></td>
-                        <td>${c.nombre}</td>
+                        <td><span class="ref-code">${c.referencia}</span></td>
+                        <td><strong>${c.nombre}</strong></td>
                         <td>${c.cedula}<br><small style="color:var(--muted);">${c.telefono}</small></td>
                         <td>${c.servicio}</td>
                         <td>${c.fecha}<br><strong>${c.hora}</strong></td>
@@ -155,12 +572,40 @@
                     </tr>
                 `;
             });
+
+            if (visibles === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:2.2rem;">No se encontraron solicitudes con los filtros actuales.</td></tr>';
+            }
+
+            renderizarBloqueos();
         }
 
         function decidir(index, estado) {
             const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
             citas[index].estado = estado;
             localStorage.setItem('vitalis_citas', JSON.stringify(citas));
+            cargarCitas();
+        }
+
+        function renderizarBloqueos() {
+            const bloqueos = JSON.parse(localStorage.getItem('vitalis_bloqueos')) || [];
+            const contenedor = document.getElementById('listaBloqueos');
+            contenedor.innerHTML = '';
+
+            bloqueos.forEach((b, i) => {
+                contenedor.innerHTML += `
+                    <span class="chip">
+                        🔒 <strong>${b.servicio}</strong> · ${b.fecha} (${b.hora})
+                        <button onclick="eliminarBloqueo(${i})" title="Quitar bloqueo">×</button>
+                    </span>
+                `;
+            });
+        }
+
+        function eliminarBloqueo(index) {
+            const bloqueos = JSON.parse(localStorage.getItem('vitalis_bloqueos')) || [];
+            bloqueos.splice(index, 1);
+            localStorage.setItem('vitalis_bloqueos', JSON.stringify(bloqueos));
             cargarCitas();
         }
 
@@ -173,7 +618,6 @@
                 hora: document.getElementById('bloqHora').value
             });
             localStorage.setItem('vitalis_bloqueos', JSON.stringify(bloqueos));
-            alert('Bloqueo horario aplicado en la agenda pública.');
             cargarCitas();
         });
 
