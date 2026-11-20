@@ -3,50 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vitalis · Panel Administrativo</title>
+    <title>Vitalis | Panel de Gestión Clínica</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <div>
-            <strong>VITALIS</strong> · Panel de Gestión
-            <span id="infoUsuario" style="font-size: 0.85rem; margin-left: 10px; opacity: 0.9;"></span>
+    <nav class="navbar">
+        <div class="brand">
+            <div class="brand-icon">+</div>
+            <div class="brand-text">
+                <h1>VITALIS · Gestión Interna</h1>
+                <span id="infoUsuario">Cargando sesión...</span>
+            </div>
         </div>
-        <button onclick="cerrarSesion()">Cerrar Sesión</button>
-    </header>
+        <div style="display:flex; gap:10px;">
+            <a href="index.html" class="btn-nav">Ver Portal Público</a>
+            <button onclick="cerrarSesion()" class="btn-nav" style="background:rgba(220,38,38,0.25);">Cerrar Sesión</button>
+        </div>
+    </nav>
 
-    <div class="container">
+    <main class="container">
+        <!-- Indicadores -->
+        <div class="kpi-grid">
+            <div class="kpi-card"><span>TOTAL SOLICITUDES</span><h4 id="kpiTotal">0</h4></div>
+            <div class="kpi-card"><span>PENDIENTES</span><h4 id="kpiPendientes" style="color:#d97706;">0</h4></div>
+            <div class="kpi-card"><span>CONFIRMADAS</span><h4 id="kpiConfirmadas" style="color:#16a34a;">0</h4></div>
+            <div class="kpi-card"><span>BLOQUEOS AGENDA</span><h4 id="kpiBloqueos" style="color:#0284c7;">0</h4></div>
+        </div>
+
+        <!-- Gestión de Citas (CU-06 / CU-07) -->
         <div class="card">
-            <h3>Solicitudes de Citas Médicas (CU-06 / CU-07)</h3>
-            <p style="font-size: 0.85rem; color: #64748b;">
-                Revise las solicitudes pendientes enviadas desde el portal público y confirme o rechace cada turno.
-            </p>
+            <div class="card-header">
+                <h3>Solicitudes de Citas Programadas</h3>
+                <select id="filtroEstado" onchange="cargarCitas()" style="width: auto; margin: 0; padding: 6px 12px;">
+                    <option value="TODOS">Todos los estados</option>
+                    <option value="Pendiente">Pendientes</option>
+                    <option value="Confirmada">Confirmadas</option>
+                    <option value="Rechazada">Rechazadas</option>
+                    <option value="Cancelada">Canceladas</option>
+                </select>
+            </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Referencia</th>
-                        <th>Paciente</th>
-                        <th>Cédula</th>
-                        <th>Servicio</th>
-                        <th>Fecha y Hora</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaCitas"></tbody>
-            </table>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Referencia</th>
+                            <th>Paciente</th>
+                            <th>Cédula / Teléfono</th>
+                            <th>Servicio</th>
+                            <th>Fecha y Hora</th>
+                            <th>Estado</th>
+                            <th>Decisión</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCitas"></tbody>
+                </table>
+            </div>
         </div>
-    </div>
+
+        <!-- Gestión de Excepciones / Bloqueos (CU-05) -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Bloqueo de Disponibilidad y Excepciones</h3>
+                <span class="tag">Control de Agenda</span>
+            </div>
+            <form id="formBloqueo" class="form-row" style="grid-template-columns: 1fr 1fr 1fr auto; align-items: end;">
+                <div>
+                    <label>Servicio</label>
+                    <select id="bloqServicio" style="margin:0;">
+                        <option value="TODOS">Todos los servicios</option>
+                        <option value="Medicina General">Medicina General</option>
+                        <option value="Pediatría">Pediatría</option>
+                        <option value="Cardiología">Cardiología</option>
+                        <option value="Ginecología y Obstetricia">Ginecología y Obstetricia</option>
+                        <option value="Ortopedia">Ortopedia</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Fecha</label>
+                    <input type="date" id="bloqFecha" style="margin:0;" required>
+                </div>
+                <div>
+                    <label>Hora a bloquear</label>
+                    <select id="bloqHora" style="margin:0;">
+                        <option value="08:00">08:00</option>
+                        <option value="09:00">09:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary" style="width:auto; padding: 10px 18px;">Bloquear Turno</button>
+            </form>
+        </div>
+    </main>
 
     <script>
-        // Protección de ruta: si no hay login, expulsar a login.html
         const sesion = JSON.parse(localStorage.getItem('vitalis_sesion'));
         if (!sesion) {
             window.location.href = 'login.html';
         } else {
-            document.getElementById('infoUsuario').textContent = `| ${sesion.nombre} (${sesion.rol})`;
+            document.getElementById('infoUsuario').textContent = `${sesion.nombre} · Rol: ${sesion.rol}`;
         }
+
+        document.getElementById('bloqFecha').value = new Date().toISOString().split('T')[0];
 
         function cerrarSesion() {
             localStorage.removeItem('vitalis_sesion');
@@ -55,40 +117,65 @@
 
         function cargarCitas() {
             const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
+            const bloqueos = JSON.parse(localStorage.getItem('vitalis_bloqueos')) || [];
+            const filtro = document.getElementById('filtroEstado').value;
             const tbody = document.getElementById('tablaCitas');
-            tbody.innerHTML = '';
 
-            if (citas.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay solicitudes registradas aún.</td></tr>';
+            // Actualizar KPIs
+            document.getElementById('kpiTotal').textContent = citas.length;
+            document.getElementById('kpiPendientes').textContent = citas.filter(c => c.estado === 'Pendiente').length;
+            document.getElementById('kpiConfirmadas').textContent = citas.filter(c => c.estado === 'Confirmada').length;
+            document.getElementById('kpiBloqueos').textContent = bloqueos.length;
+
+            tbody.innerHTML = '';
+            const filtradas = filtro === 'TODOS' ? citas : citas.filter(c => c.estado === filtro);
+
+            if (filtradas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:2rem;">No hay solicitudes para mostrar en esta vista.</td></tr>';
                 return;
             }
 
-            citas.forEach((cita, index) => {
-                const acciones = cita.estado === 'Pendiente'
-                    ? `<button class="btn-sm btn-ok" onclick="cambiarEstado(${index}, 'Confirmada')">Confirmar</button>
-                       <button class="btn-sm btn-no" onclick="cambiarEstado(${index}, 'Rechazada')">Rechazar</button>`
-                    : '<span style="color:#94a3b8; font-size:0.85rem;">Procesada</span>';
+            citas.forEach((c, index) => {
+                if (filtro !== 'TODOS' && c.estado !== filtro) return;
+
+                const botones = c.estado === 'Pendiente'
+                    ? `<button class="btn-action btn-ok" onclick="decidir(${index}, 'Confirmada')">Confirmar</button>
+                       <button class="btn-action btn-no" onclick="decidir(${index}, 'Rechazada')">Rechazar</button>`
+                    : `<span style="color:var(--muted); font-size:0.8rem;">Cerrada</span>`;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${cita.referencia}</strong></td>
-                        <td>${cita.nombre}</td>
-                        <td>${cita.cedula}</td>
-                        <td>${cita.servicio}</td>
-                        <td>${cita.fecha} · ${cita.hora}</td>
-                        <td><span class="badge ${cita.estado}">${cita.estado}</span></td>
-                        <td>${acciones}</td>
+                        <td><strong>${c.referencia}</strong></td>
+                        <td>${c.nombre}</td>
+                        <td>${c.cedula}<br><small style="color:var(--muted);">${c.telefono}</small></td>
+                        <td>${c.servicio}</td>
+                        <td>${c.fecha}<br><strong>${c.hora}</strong></td>
+                        <td><span class="badge ${c.estado}">${c.estado}</span></td>
+                        <td>${botones}</td>
                     </tr>
                 `;
             });
         }
 
-        function cambiarEstado(index, nuevoEstado) {
+        function decidir(index, estado) {
             const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
-            citas[index].estado = nuevoEstado;
+            citas[index].estado = estado;
             localStorage.setItem('vitalis_citas', JSON.stringify(citas));
             cargarCitas();
         }
+
+        document.getElementById('formBloqueo').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const bloqueos = JSON.parse(localStorage.getItem('vitalis_bloqueos')) || [];
+            bloqueos.push({
+                servicio: document.getElementById('bloqServicio').value,
+                fecha: document.getElementById('bloqFecha').value,
+                hora: document.getElementById('bloqHora').value
+            });
+            localStorage.setItem('vitalis_bloqueos', JSON.stringify(bloqueos));
+            alert('Bloqueo horario aplicado en la agenda pública.');
+            cargarCitas();
+        });
 
         cargarCitas();
     </script>
