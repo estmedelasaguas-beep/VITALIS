@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitalis · Agendamiento de Citas Médicas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div><strong>VITALIS</strong> · Hospital Universitario Erasmo Meoz</div>
+        <a href="login.html">Acceso Personal Autorizado →</a>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Solicitar Cita Médica (CU-01 / CU-02)</h2>
+            <p style="font-size: 0.85rem; color: #64748b;">
+                Complete los datos para registrar su solicitud en estado <strong>Pendiente</strong> sin necesidad de crear una cuenta.
+            </p>
+
+            <div id="alertaReserva" class="alert alert-success" style="display: none;"></div>
+
+            <form id="formCita">
+                <label>Especialidad / Servicio</label>
+                <select id="servicio" required>
+                    <option value="Medicina General">Medicina General</option>
+                    <option value="Pediatría">Pediatría</option>
+                    <option value="Cardiología">Cardiología</option>
+                    <option value="Ginecología">Ginecología</option>
+                </select>
+
+                <label>Nombre completo del paciente</label>
+                <input type="text" id="nombre" placeholder="Ej: Juan Pérez" required>
+
+                <label>Número de cédula</label>
+                <input type="text" id="cedula" placeholder="Ej: 1090123456" required>
+
+                <label>Teléfono de contacto</label>
+                <input type="tel" id="telefono" placeholder="Ej: 3001234567" required>
+
+                <label>Fecha deseada</label>
+                <input type="date" id="fecha" required>
+
+                <label>Bloque horario disponible</label>
+                <select id="hora" required>
+                    <option value="08:00">08:00 AM</option>
+                    <option value="09:00">09:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="14:00">02:00 PM</option>
+                    <option value="15:00">03:00 PM</option>
+                </select>
+
+                <button type="submit" class="btn-primary">Registrar Solicitud de Cita</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Consultar Estado de Solicitud (CU-04)</h3>
+            <form id="formConsulta" style="display: flex; gap: 10px;">
+                <input type="text" id="buscarRef" placeholder="Ingrese su código (Ej: VIT-4821)" style="margin-bottom: 0;" required>
+                <button type="submit" class="btn-primary" style="width: auto; padding: 0 20px;">Consultar</button>
+            </form>
+            <div id="resultadoConsulta" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('formCita').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+            const servicio = document.getElementById('servicio').value;
+
+            // Validar que no exista una cita activa en el mismo bloque (regla de integridad)
+            const ocupado = citas.some(c => c.fecha === fecha && c.hora === hora && c.servicio === servicio && c.estado !== 'Rechazada');
+            if (ocupado) {
+                alert('Ese bloque horario ya tiene una solicitud activa para este servicio. Seleccione otro.');
+                return;
+            }
+
+            const referencia = 'VIT-' + Math.floor(1000 + Math.random() * 9000);
+            const nuevaCita = {
+                referencia,
+                servicio,
+                nombre: document.getElementById('nombre').value.trim(),
+                cedula: document.getElementById('cedula').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+                fecha,
+                hora,
+                estado: 'Pendiente'
+            };
+
+            citas.push(nuevaCita);
+            localStorage.setItem('vitalis_citas', JSON.stringify(citas));
+
+            const alerta = document.getElementById('alertaReserva');
+            alerta.innerHTML = `Solicitud registrada correctamente en estado <strong>Pendiente</strong>. Guarde su código de referencia: <strong>${referencia}</strong>`;
+            alerta.style.display = 'block';
+            this.reset();
+        });
+
+        document.getElementById('formConsulta').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const ref = document.getElementById('buscarRef').value.trim().toUpperCase();
+            const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
+            const encontrada = citas.find(c => c.referencia === ref);
+            const div = document.getElementById('resultadoConsulta');
+
+            if (encontrada) {
+                div.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>Referencia:</strong> ${encontrada.referencia} | 
+                        <strong>Paciente:</strong> ${encontrada.nombre} | 
+                        <strong>Servicio:</strong> ${encontrada.servicio} (${encontrada.fecha} ${encontrada.hora}) | 
+                        <strong>Estado:</strong> <span class="badge ${encontrada.estado}">${encontrada.estado}</span>
+                    </div>`;
+            } else {
+                div.innerHTML = `<div class="alert alert-error">No se encontró ninguna solicitud con esa referencia.</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
