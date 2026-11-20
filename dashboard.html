@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitalis · Panel Administrativo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div>
+            <strong>VITALIS</strong> · Panel de Gestión
+            <span id="infoUsuario" style="font-size: 0.85rem; margin-left: 10px; opacity: 0.9;"></span>
+        </div>
+        <button onclick="cerrarSesion()">Cerrar Sesión</button>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h3>Solicitudes de Citas Médicas (CU-06 / CU-07)</h3>
+            <p style="font-size: 0.85rem; color: #64748b;">
+                Revise las solicitudes pendientes enviadas desde el portal público y confirme o rechace cada turno.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Referencia</th>
+                        <th>Paciente</th>
+                        <th>Cédula</th>
+                        <th>Servicio</th>
+                        <th>Fecha y Hora</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCitas"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Protección de ruta: si no hay login, expulsar a login.html
+        const sesion = JSON.parse(localStorage.getItem('vitalis_sesion'));
+        if (!sesion) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('infoUsuario').textContent = `| ${sesion.nombre} (${sesion.rol})`;
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('vitalis_sesion');
+            window.location.href = 'login.html';
+        }
+
+        function cargarCitas() {
+            const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
+            const tbody = document.getElementById('tablaCitas');
+            tbody.innerHTML = '';
+
+            if (citas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay solicitudes registradas aún.</td></tr>';
+                return;
+            }
+
+            citas.forEach((cita, index) => {
+                const acciones = cita.estado === 'Pendiente'
+                    ? `<button class="btn-sm btn-ok" onclick="cambiarEstado(${index}, 'Confirmada')">Confirmar</button>
+                       <button class="btn-sm btn-no" onclick="cambiarEstado(${index}, 'Rechazada')">Rechazar</button>`
+                    : '<span style="color:#94a3b8; font-size:0.85rem;">Procesada</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${cita.referencia}</strong></td>
+                        <td>${cita.nombre}</td>
+                        <td>${cita.cedula}</td>
+                        <td>${cita.servicio}</td>
+                        <td>${cita.fecha} · ${cita.hora}</td>
+                        <td><span class="badge ${cita.estado}">${cita.estado}</span></td>
+                        <td>${acciones}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function cambiarEstado(index, nuevoEstado) {
+            const citas = JSON.parse(localStorage.getItem('vitalis_citas')) || [];
+            citas[index].estado = nuevoEstado;
+            localStorage.setItem('vitalis_citas', JSON.stringify(citas));
+            cargarCitas();
+        }
+
+        cargarCitas();
+    </script>
+</body>
+</html>
