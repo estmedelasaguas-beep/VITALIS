@@ -1,0 +1,150 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    margin: 0;
+    background-color: #f0f4f8;
+    color: #2c3e50;
+}
+
+header {
+    background-color: #1b4f72;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header a, header button {
+    color: white;
+    text-decoration: none;
+    background: #2874a6;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+header button:hover, header a:hover {
+    background: #1f618d;
+}
+
+.container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+}
+
+.login-box {
+    max-width: 380px;
+    margin: 4rem auto;
+}
+
+h2, h3 {
+    color: #1b4f72;
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: #1b4f72;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #154360;
+}
+
+.alert {
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.alert-success {
+    background: #d4efdf;
+    color: #145a32;
+    border: 1px solid #a9dfbf;
+}
+
+.alert-error {
+    background: #fadbd8;
+    color: #78281f;
+    border: 1px solid #f5b7b1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+th {
+    background-color: #f8fafc;
+    color: #1b4f72;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.Pendiente { background: #fef9e7; color: #9a7d0a; }
+.Confirmada { background: #d4efdf; color: #145a32; }
+.Rechazada { background: #fadbd8; color: #78281f; }
+
+.btn-sm {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.btn-ok { background: #27ae60; }
+.btn-no { background: #c0392b; }
