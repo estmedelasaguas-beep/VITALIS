@@ -234,19 +234,31 @@
             };
 
             citas.push(nuevaCita);
-            fetch(API_URL, {
+            
+fetch(API_URL, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
   },
-  body: JSON.stringify(nuevaCita)
+  body: JSON.stringify({
+    action: 'crear',
+    especialidad: nuevaCita.servicio,
+    fecha: nuevaCita.fecha,
+    hora: nuevaCita.hora,
+    nombre_paciente: nuevaCita.nombre,
+    cedula: nuevaCita.cedula,
+    telefono: nuevaCita.telefono
+  })
 })
-.then(response => {
-  if (!response.ok) throw new Error('Error al guardar');
-  return response.json();
+.then(async response => {
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Error al guardar');
+  }
+  console.log('Cita guardada en Supabase:', data);
 })
-.then(data => console.log('Respuesta de Supabase:', data))
 .catch(error => console.error('Error:', error));
+
             localStorage.setItem('vitalis_citas', JSON.stringify(citas));
 
             const comp = document.getElementById('comprobanteBox');
