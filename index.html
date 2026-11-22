@@ -234,6 +234,19 @@
             };
 
             citas.push(nuevaCita);
+            fetch(API_URL, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(nuevaCita)
+})
+.then(response => {
+  if (!response.ok) throw new Error('Error al guardar');
+  return response.json();
+})
+.then(data => console.log('Respuesta de Supabase:', data))
+.catch(error => console.error('Error:', error));
             localStorage.setItem('vitalis_citas', JSON.stringify(citas));
 
             const comp = document.getElementById('comprobanteBox');
