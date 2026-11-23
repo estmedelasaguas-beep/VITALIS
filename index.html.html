@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitalis | Agendamiento Médico · HUEM</title>
+   
+<script>
+  const API_URL = "https://uybelucesrccjjfgbfcj.supabase.co/functions/v1/vitalis-api";
+</script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-gradient-to-r from-sky-950 via-sky-900 to-teal-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center font-bold text-2xl shadow-md shadow-teal-500/30">
+                    +
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight leading-none">VITALIS</h1>
+                    <p class="text-xs text-sky-200 mt-1">Hospital Universitario Erasmo Meoz · Cúcuta</p>
+                </div>
+            </div>
+            <a href="login.html" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-xl text-sm font-semibold transition backdrop-blur-sm">
+                <span>Acceso Personal</span>
+                <span>→</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="bg-white border-b border-slate-200/80 py-10 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <span class="inline-block bg-teal-50 text-teal-700 border border-teal-200 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                PORTAL DE ATENCIÓN AL CIUDADANO
+            </span>
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+                Agenda tu cita médica en minutos
+            </h2>
+            <p class="text-slate-500 mt-2 text-base max-w-xl mx-auto">
+                Selecciona un horario y registra tu solicitud sin crear una cuenta. La disponibilidad se confirma al enviar la solicitud.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contenido Principal -->
+    <main class="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 w-full">
+        
+        <!-- Formulario Agendar (7 columnas) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 md:p-8">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-5 mb-6">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Nueva Solicitud de Cita</h3>
+                    <p class="text-sm text-slate-500">Completa los datos del paciente para reservar un bloque</p>
+                </div>
+                <span class="bg-sky-50 text-sky-700 text-xs font-bold px-3 py-1.5 rounded-lg">Paso 1 de 1</span>
+            </div>
+
+            <div id="comprobanteBox" class="hidden mb-6"></div>
+            <div id="errorBox" class="hidden bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm mb-6"></div>
+
+            <form id="formCita" class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Especialidad Médica</label>
+                        <select id="servicio" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-sky-600 focus:ring-4 focus:ring-sky-600/10 outline-none transition">
+                            <option value="Medicina General">Medicina General</option>
+                            <option value="Pediatría">Pediatría</option>
+                            <option value="Cardiología">Cardiología</option>
+                            <option value="Ginecología y Obstetricia">Ginecología y Obstetricia</option>
+                            <option value="Ortopedia">Ortopedia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Fecha de Atención</label>
+                        <input type="date" id="fecha" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-sky-600 focus:ring-4 focus:ring-sky-600/10 outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Bloques Horarios (sujetos a confirmación)</label>
+                    <div id="slotsContainer" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5"></div>
+                    <input type="hidden" id="horaSeleccionada" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Nombre Completo del Paciente</label>
+                    <input type="text" id="nombre" placeholder="Ej: Carlos Andrés Mendoza" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:bg-white focus:border-sky-600 focus:ring-4 focus:ring-sky-600/10 outline-none transition">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Número de Cédula</label>
+                        <input type="text" id="cedula" placeholder="Ej: 1090456789" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:bg-white focus:border-sky-600 focus:ring-4 focus:ring-sky-600/10 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Teléfono de Contacto</label>
+                        <input type="tel" id="telefono" placeholder="Ej: 3112345678" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-sm focus:bg-white focus:border-sky-600 focus:ring-4 focus:ring-sky-600/10 outline-none transition">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-sky-900 hover:bg-sky-800 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md shadow-sky-900/15 transition transform active:scale-[0.99]">
+                    Confirmar Solicitud de Cita
+                </button>
+            </form>
+        </div>
+
+        <!-- Columna Derecha: Seguimiento (5 columnas) -->
+        <div class="lg:col-span-5 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 md:p-8">
+                <div class="border-b border-slate-100 pb-4 mb-5">
+                    <h3 class="text-lg font-bold text-slate-900">Consultar Estado de Cita</h3>
+                    <p class="text-sm text-slate-500 mt-1">Verifica el estado de tu turno con tu código y cédula.</p>
+                </div>
+
+                <form id="formConsulta" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Código de Referencia</label>
+                        <input type="text" id="consultaRef" placeholder="Ej: VIT-4821" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm uppercase focus:bg-white focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Cédula del Titular</label>
+                        <input type="text" id="consultaCedula" placeholder="Ingrese su número de cédula" required class="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm focus:bg-white focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10 outline-none transition">
+                    </div>
+                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-5 rounded-xl shadow-md shadow-teal-600/15 transition">
+                        Verificar Estado
+                    </button>
+                </form>
+
+                <div id="resultadoConsulta" class="mt-5"></div>
+            </div>
+
+            <div class="bg-sky-950 text-sky-100 rounded-2xl p-6 shadow-sm">
+                <h4 class="font-bold text-white text-sm flex items-center gap-2 mb-3">
+                    <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+                    Información del Proceso
+                </h4>
+                <ul class="space-y-2 text-xs text-sky-200/90 leading-relaxed">
+                    <li>• Toda solicitud ingresa en estado <strong>Pendiente</strong> para validación de agenda por el hospital.</li>
+                    <li>• Guarda el código de referencia que recibes para consultar el estado de tu solicitud.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+        Vitalis · Sistema de Gestión de Citas Médicas — Grupo 3 Medisync (FESC)
+    </footer>
+
+    <script>
+        const BLOQUES_BASE = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
+        const inputFecha = document.getElementById('fecha');
+        const inputServicio = document.getElementById('servicio');
+        const slotsContainer = document.getElementById('slotsContainer');
+        const inputHora = document.getElementById('horaSeleccionada');
+        const errorBox = document.getElementById('errorBox');
+        const formCita = document.getElementById('formCita');
+        const submitBtn = formCita.querySelector('button[type="submit"]');
+
+        function fechaLocal() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+        inputFecha.min = fechaLocal();
+        inputFecha.value = fechaLocal();
+
+        function textoSeguro(valor) {
+            return String(valor ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function mostrarError(mensaje) {
+            errorBox.textContent = mensaje;
+            errorBox.classList.remove('hidden');
+        }
+        async function solicitarAPI(payload) {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || data.error) throw new Error(data.error || `Error HTTP ${response.status}`);
+            return data;
+        }
+        function renderizarHorarios() {
+            inputHora.value = '';
+            slotsContainer.innerHTML = '';
+            BLOQUES_BASE.forEach(hora => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'slot-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:border-sky-600 hover:bg-sky-50 text-slate-700 text-sm font-semibold transition cursor-pointer';
+                btn.textContent = hora;
+                btn.onclick = () => {
+                    document.querySelectorAll('.slot-btn').forEach(b => b.className = 'slot-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:border-sky-600 hover:bg-sky-50 text-slate-700 text-sm font-semibold transition cursor-pointer');
+                    btn.className = 'slot-btn py-2.5 px-3 rounded-xl border-2 border-sky-700 bg-sky-900 text-white text-sm font-bold shadow-sm transition cursor-pointer';
+                    inputHora.value = hora;
+                };
+                slotsContainer.appendChild(btn);
+            });
+        }
+        inputFecha.addEventListener('change', renderizarHorarios);
+        inputServicio.addEventListener('change', renderizarHorarios);
+        renderizarHorarios();
+
+        formCita.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            errorBox.classList.add('hidden');
+            document.getElementById('comprobanteBox').classList.add('hidden');
+            if (!inputHora.value) return mostrarError('Por favor selecciona un bloque horario antes de confirmar.');
+            if (inputFecha.value < fechaLocal()) return mostrarError('Selecciona una fecha válida.');
+            const nuevaCita = {
+                especialidad: inputServicio.value,
+                fecha: inputFecha.value,
+                hora: inputHora.value,
+                nombre_paciente: document.getElementById('nombre').value.trim(),
+                cedula: document.getElementById('cedula').value.trim(),
+                telefono: document.getElementById('telefono').value.trim()
+            };
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando solicitud...';
+            try {
+                const resultado = await solicitarAPI({accion: 'crear', ...nuevaCita});
+                const cita = resultado.cita;
+                if (!resultado.ok || !cita?.codigo_referencia) throw new Error('La API no devolvió el código de referencia. Verifica el registro en Supabase antes de intentar de nuevo.');
+                const referencia = cita.codigo_referencia;
+                const comp = document.getElementById('comprobanteBox');
+                comp.classList.remove('hidden');
+                comp.innerHTML = `
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+                        <div class="flex justify-between items-start"><div>
+                            <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">✓ Solicitud Registrada</span>
+                            <div class="text-2xl font-extrabold text-emerald-900 mt-1">${textoSeguro(referencia)}</div>
+                        </div><span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">${textoSeguro(cita.estado || 'Pendiente')}</span></div>
+                        <div class="mt-3 pt-3 border-t border-emerald-200/70 text-sm text-emerald-900 space-y-1">
+                            <div><strong>Paciente:</strong> ${textoSeguro(nuevaCita.nombre_paciente)}</div>
+                            <div><strong>Especialidad:</strong> ${textoSeguro(nuevaCita.especialidad)}</div>
+                            <div><strong>Fecha y Hora:</strong> ${textoSeguro(nuevaCita.fecha)} · ${textoSeguro(nuevaCita.hora)}</div>
+                        </div>
+                    </div>`;
+                document.getElementById('consultaRef').value = referencia;
+                document.getElementById('consultaCedula').value = nuevaCita.cedula;
+                this.reset();
+                inputFecha.value = fechaLocal();
+                renderizarHorarios();
+            } catch (error) {
+                mostrarError(error.message || 'No se pudo conectar con Supabase.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Confirmar Solicitud de Cita';
+            }
+        });
+
+        document.getElementById('formConsulta').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const ref = document.getElementById('consultaRef').value.trim().toUpperCase();
+            const cedula = document.getElementById('consultaCedula').value.trim();
+            const res = document.getElementById('resultadoConsulta');
+            res.textContent = 'Consultando en Supabase...';
+            try {
+                const respuesta = await solicitarAPI({accion: 'consultar', codigo_referencia: ref, cedula});
+                const c = respuesta.cita;
+                if (!c) throw new Error('Cita no encontrada.');
+                const colores = {
+                    'Pendiente': 'bg-amber-100 text-amber-800',
+                    'Confirmada': 'bg-emerald-100 text-emerald-800',
+                    'Rechazada': 'bg-rose-100 text-rose-800',
+                    'Cancelada': 'bg-slate-200 text-slate-700'
+                };
+                const claseEstado = colores[c.estado] || 'bg-slate-200 text-slate-700';
+                res.innerHTML = `
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm space-y-1.5">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <span class="font-bold text-sky-900">${textoSeguro(c.codigo_referencia)}</span>
+                            <span class="${claseEstado} text-xs font-bold px-2.5 py-0.5 rounded-full">${textoSeguro(c.estado)}</span>
+                        </div>
+                        <div><strong>Servicio:</strong> ${textoSeguro(c.especialidad)}</div>
+                        <div><strong>Turno:</strong> ${textoSeguro(c.fecha)} · ${textoSeguro(c.hora)}</div>
+                        <p class="text-xs text-slate-500 mt-3">Para cancelar, contacta al personal del hospital. La cancelación en línea requiere habilitar esa función en la API.</p>
+                    </div>`;
+            } catch (error) {
+                res.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-xl text-xs font-medium">${textoSeguro(error.message)}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
